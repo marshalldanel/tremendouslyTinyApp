@@ -29,10 +29,16 @@ Start with node
 npm init
 ```
 
-Install express
+Install Express
 
 ```
  npm install express --save
+```
+
+Install EJS
+
+```
+ npm install ejs --save
 ```
 
 Boom. Fantastic.
