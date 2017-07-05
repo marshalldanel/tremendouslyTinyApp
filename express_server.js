@@ -39,9 +39,18 @@ app.post('/urls', (req, res) => {
   res.redirect(`http://localhost:8080/urls/${randStr}`);
 });
 
+app.post('/urls/:id/delete', (req, res) => {
+  const url = urlDatabase[req.params.id];
+  if (url === undefined) {
+    res.status(404).send(`Cannot delete ${url}`);
+  } else {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+  }
+});
+
 app.get('/u/:shortURL', (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
-  console.log(longURL);
   res.redirect(longURL);
 });
 
