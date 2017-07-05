@@ -6,16 +6,19 @@
     <% include partials/_header %>
 </head>
 <body>
-  <a href = ''>Make your URL super duper tiny!</a>
-  <table>
-    <tr>
-      <th>URL</th>
-      <th>Short URL</th>
-    </tr>
-    <tr>
-      <td>.....</td>
-      <td>...</td>
-    </tr>
-  </table>
+  <a href = '/urls/new'>Make your URL super duper tiny!</a>
+    <table>
+      <% for(var db in urls) { %>
+        <tr>
+          <td><%=`Long: ${urls[db]}`%></td>
+          <td><%=`Tiny: ${db}`%>
+            <form method='POST' action='/urls/<%= db %>/delete'>
+              <input type='submit' value='Delete'>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </table>
+  </ul>
 </body>
 </html>
