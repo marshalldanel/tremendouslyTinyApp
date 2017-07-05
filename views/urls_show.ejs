@@ -15,6 +15,9 @@
       <th><%=`Tiny: ${shortURL}`%></th>
     </tr>
   </table>
-  <a href = ' /urls'>Take me to my URLs</a>
+  <form method='POST' action='/urls/<%= shortURL %>'>
+    <input id='longURL' type='text' name = 'longURL' placeholder='http://'>
+    <input type='submit' value='Update'>
+  </form>
 </body>
 </html>
