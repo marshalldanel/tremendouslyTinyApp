@@ -1,0 +1,20 @@
+{
+  "name": "tinyapp",
+  "version": "1.0.0",
+  "description": "URL shortener",
+  "main": "express_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "local": "./node_modules/.bin/nodemon -L --watch express_server.js express_server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marshalldanel/tremendouslyTinyApp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marshalldanel/tremendouslyTinyApp/issues"
+  },
+  "homepage": "https://github.com/marshalldanel/tremendouslyTinyApp#readme"
+}
