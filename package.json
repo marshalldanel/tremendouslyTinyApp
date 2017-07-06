@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/marshalldanel/tremendouslyTinyApp/issues"
   },
-  "homepage": "https://github.com/marshalldanel/tremendouslyTinyApp#readme"
+  "homepage": "https://github.com/marshalldanel/tremendouslyTinyApp#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.3"
+  }
 }

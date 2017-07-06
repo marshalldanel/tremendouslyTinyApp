@@ -8,14 +8,18 @@
 <body>
   <a href = '/urls/new'>Make your URL super duper tiny!</a>
     <table>
+      <th>Long URL</th>
+      <th>Tiny URL</th>
     <% for(let db in urls) { %>
       <tr>
-        <td><%=`Long: ${urls[db]}`%></td>
-        <td><%=`Tiny: ${db}`%>
+        <td><%= urls[db] %></td>
+        <td><%= db %> 
+        <td><a href="/urls/<%=db%>">Edit</a></td>
+        <td>
           <form method='POST' action='/urls/<%= db %>/delete'>
             <input type='submit' value='Delete'>
           </form>
-          <a href="/urls/<%=db%>">Edit</a>
+        </td>
         </td>
       </tr>
     <% } %>

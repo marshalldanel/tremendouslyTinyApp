@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="css/style.css" rel="stylesheet"></head>
+     <% include partials/_header %>
+    </head>
   <body style='font-size:20px; padding:50px'>
-    <% include partials/_header %>
-    <form action='/urls' method='POST'>
+    <form action='/urls/' method='POST'>
       <label for='longURL'>Enter a URL:</label>
       <input id='longURL' type='text' name='longURL' placeholder='http://'>
       <input type='submit' value='Submit'>

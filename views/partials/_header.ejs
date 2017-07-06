@@ -1,12 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title></title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="css/style.css" rel="stylesheet">
-  </head>
-  <body>
-  
-  </body>
-</html>
+<title>Header</title>
+
+<% if(username) { %>
+  <h4>User logged in: <%= username %></h4>
+  <form action="/logout" method="POST"> 
+    <input <button type="submit" value="Logout"></button></input>
+  </form>
+<% } else { %>
+  <form action="/login" method="POST"> 
+    <input type="text" name="username" placeholder="Username"></input>
+    <input <button type="submit" value="Login"></button></input>
+  </form>
+<% } %>
