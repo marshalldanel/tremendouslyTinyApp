@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const helperFuncs = require('./helper_funcs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -26,6 +25,31 @@ var urlDatabase = {
   '9sm5xk': 'http://www.google.com'
 };
 
+//// #USER DATABASE ////
+
+var usersDB = {
+  "hjk9h": {
+    id: "hjk9h",
+    email: "chrondCK@hotmail.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "kihd9": {
+    id: "kihd9",
+    email: "chrochochoco@gmail.com",
+    password: "dishwasher-funk"
+  }
+};
+
+//// #HELPER FUNCTIONS
+getRandomString = function()  {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for(let i = 0; i < 6; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length ));
+  }
+  return text;
+};
+
 //// #EASTER EGG ////
 
 app.get('/hello', (req, res) => {
@@ -35,12 +59,12 @@ app.get('/hello', (req, res) => {
 //// #URLS ////
 
 app.get('/urls', (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
 
 app.post('/urls', (req, res) => {
-  const randStr = helperFuncs;
+  let randStr = getRandomString();
   urlDatabase[randStr] = req.body.longURL;
   res.redirect(`/urls/${randStr}`);
 });
@@ -96,4 +120,23 @@ app.post('/logout', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
+});
+
+//// #USER REGISTRATION ////
+
+app.get('/register', (req, res) => {
+  res.render('urls_register');
+});
+
+app.post('/register', (req, res) => {
+  console.log(usersDB);
+  const randUser = getRandomString();
+  usersDB = {
+    userID: randUser,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('userID', usersDB.userID);
+  console.log(usersDB);
+  res.redirect('/urls/');
 });
