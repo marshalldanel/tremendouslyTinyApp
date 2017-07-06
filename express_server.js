@@ -1,11 +1,19 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.set('view engine', 'ejs');
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(function (req, res, next) {
+  res.locals = {
+    username: req.cookies["username"]
+  };
+  next();
+});
 
 var urlDatabase = {
   'b2xVn2': 'http://www.lighthouse.cs',
@@ -71,5 +79,15 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.post('/urls/:id', (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect('/urls/');
+});
+
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls/');
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
   res.redirect('/urls/');
 });
