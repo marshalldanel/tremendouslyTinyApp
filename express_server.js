@@ -7,17 +7,6 @@ const PORT = process.env.PORT || 8080;
 
 app.set('view engine', 'ejs');
 
-//// #MIDDLEWARE ////
-
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(function (req, res, next) {
-  res.locals = {
-    username: req.cookies["username"]
-  };
-  next();
-});
-
 //// #DATABASE ////
 
 var urlDatabase = {
@@ -39,6 +28,18 @@ var usersDB = {
     password: "dishwasher-funk"
   }
 };
+
+//// #MIDDLEWARE ////
+
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(function (req, res, next) {
+  res.locals = {
+    username: req.cookies["username"]
+  };
+  next();
+});
+
 
 //// #HELPER FUNCTIONS
 getRandomString = function()  {
@@ -128,15 +129,32 @@ app.get('/register', (req, res) => {
   res.render('urls_register');
 });
 
+function emailExist(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
 app.post('/register', (req, res) => {
-  console.log(usersDB);
   const randUser = getRandomString();
-  usersDB = {
-    userID: randUser,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie('userID', usersDB.userID);
-  console.log(usersDB);
-  res.redirect('/urls/');
+  const email = req.body.email;
+  const password = req.body.password;
+  let userID = usersDB.userID;
+  if (!email || !password) {
+    res.status(400).send('Please enter a valid username/email');
+  } else if (emailExist(req.body.email)) {
+    res.status(400).send('That email address is already registered, please try again');
+  } else {
+    usersDB[randUser] = {
+      userID: randUser,
+      email: req.body.email,
+      password: req.body.password
+    };
+    console.log(usersDB);
+    res.cookie('userID',  userID);
+    res.redirect('/urls/');
+  }
 });
