@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -64,7 +65,7 @@ app.use(function (req, res, next) {
 //// #HELPER FUNCTIONS ////
 //////
 
-getRandomString = function()  {
+getRandomString = function() {
   let text = "";
   const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for(let i = 0; i < 6; i++) {
@@ -90,12 +91,7 @@ function userLookup(formEmail) {
 }
 
 function emailExist(formEmail) {
-  for (let item in usersDB) {
-    if (usersDB[item].email === formEmail) {
-      return true;
-    }
-  }
-  return false;
+  return !!userLookup(formEmail);
 }
 
 //////
@@ -131,9 +127,9 @@ app.get('/urls', (req, res) => {
   if (!req.cookies["userID"]) {
     res.redirect('/login');
   } else {
-  const newUserUrls = urlsForUser(req.cookies["userID"]);
-  const templateVars = { urls: newUserUrls};
-  res.render('urls_index', templateVars);
+    const newUserUrls = urlsForUser(req.cookies["userID"]);
+    const templateVars = { urls: newUserUrls};
+    res.render('urls_index', templateVars);
   }
 });
 
@@ -222,10 +218,10 @@ app.get('/login', (res, req) => {
 });
 
 app.post('/login', (req, res) => {
-  if (!req.body.email || !req.body.password || emailPassMatch(req.body.email) !== req.body.password) {
+  let userInfo = userLookup(req.body.email);
+  if (userInfo === undefined || !bcrypt.compareSync(req.body.password, userInfo.password)) {
     res.status(403).send('Please enter a valid email/password');
   } else {
-    let userInfo = userLookup(req.body.email);
     res.cookie('userID', userInfo.id);
     res.redirect('/urls');
   }
@@ -256,6 +252,7 @@ app.post('/register', (req, res) => {
   const randUser = getRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   let userID = usersDB.userID;
   if (!email || !password) {
     res.status(400).send('Please enter a valid email/password');
@@ -265,9 +262,10 @@ app.post('/register', (req, res) => {
     usersDB[randUser] = {
       id: randUser,
       email: req.body.email,
-      password: req.body.password
+      password: hashedPassword
     };
     res.cookie('userID', randUser);
+    console.log(usersDB);
     res.redirect('/urls/');
   }
 });
