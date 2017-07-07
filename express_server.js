@@ -26,6 +26,11 @@ var usersDB = {
     id: "kihd9",
     email: "chrochochoco@gmail.com",
     password: "dishwasher-funk"
+  },
+  "njaksl": {
+    id: "njaksl",
+    email: "mmm@mmm.com",
+    password: "mmm"
   }
 };
 
@@ -33,9 +38,10 @@ var usersDB = {
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
+
 app.use(function (req, res, next) {
   res.locals = {
-    username: req.cookies["username"]
+    user: usersDB[req.cookies["userID"]]
   };
   next();
 });
@@ -50,6 +56,11 @@ getRandomString = function()  {
   }
   return text;
 };
+
+//// #HOME ////
+app.get('/', (req, res) => {
+  res.redirect('/urls/');
+});
 
 //// #EASTER EGG ////
 
@@ -107,13 +118,40 @@ app.post('/urls/:id/delete', (req, res) => {
 
 //// #USER LOGIN/OUT ////
 
+app.get('/login', (res, req) => {
+  req.render('urls_login');
+});
+
+function emailPassMatch(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return usersDB[item].password;
+    }
+  }
+}
+
+function userLookup(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return usersDB[item];
+    }
+  }
+}
+
+
+
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls/');
+  if (!req.body.email || !req.body.password || emailPassMatch(req.body.email) !== req.body.password) {
+    res.status(400).send('Please enter a valid email/password');
+  } else {
+    let userInfo = userLookup(req.body.email);
+    res.cookie('userID', userInfo.id);
+    res.redirect('/urls');
+  }
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('userID');
   res.redirect('/urls/');
 });
 
@@ -144,7 +182,7 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   let userID = usersDB.userID;
   if (!email || !password) {
-    res.status(400).send('Please enter a valid username/email');
+    res.status(400).send('Please enter a valid email/password');
   } else if (emailExist(req.body.email)) {
     res.status(400).send('That email address is already registered, please try again');
   } else {
@@ -153,8 +191,7 @@ app.post('/register', (req, res) => {
       email: req.body.email,
       password: req.body.password
     };
-    console.log(usersDB);
-    res.cookie('userID',  userID);
+    res.cookie('userID', randUser);
     res.redirect('/urls/');
   }
 });
