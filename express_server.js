@@ -1,23 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const helperFuncs = require('./helper_funcs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.set('view engine', 'ejs');
-
-//// #MIDDLEWARE ////
-
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(function (req, res, next) {
-  res.locals = {
-    username: req.cookies["username"]
-  };
-  next();
-});
 
 //// #DATABASE ////
 
@@ -25,6 +13,54 @@ var urlDatabase = {
   'b2xVn2': 'http://www.lighthouse.cs',
   '9sm5xk': 'http://www.google.com'
 };
+
+//// #USER DATABASE ////
+
+var usersDB = {
+  "hjk9h": {
+    id: "hjk9h",
+    email: "chrondCK@hotmail.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "kihd9": {
+    id: "kihd9",
+    email: "chrochochoco@gmail.com",
+    password: "dishwasher-funk"
+  },
+  "njaksl": {
+    id: "njaksl",
+    email: "mmm@mmm.com",
+    password: "mmm"
+  }
+};
+
+//// #MIDDLEWARE ////
+
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: true}));
+
+app.use(function (req, res, next) {
+  res.locals = {
+    user: usersDB[req.cookies["userID"]]
+  };
+  next();
+});
+
+
+//// #HELPER FUNCTIONS
+getRandomString = function()  {
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for(let i = 0; i < 6; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length ));
+  }
+  return text;
+};
+
+//// #HOME ////
+app.get('/', (req, res) => {
+  res.redirect('/urls/');
+});
 
 //// #EASTER EGG ////
 
@@ -35,12 +71,12 @@ app.get('/hello', (req, res) => {
 //// #URLS ////
 
 app.get('/urls', (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
 
 app.post('/urls', (req, res) => {
-  const randStr = helperFuncs;
+  let randStr = getRandomString();
   urlDatabase[randStr] = req.body.longURL;
   res.redirect(`/urls/${randStr}`);
 });
@@ -82,13 +118,40 @@ app.post('/urls/:id/delete', (req, res) => {
 
 //// #USER LOGIN/OUT ////
 
+app.get('/login', (res, req) => {
+  req.render('urls_login');
+});
+
+function emailPassMatch(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return usersDB[item].password;
+    }
+  }
+}
+
+function userLookup(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return usersDB[item];
+    }
+  }
+}
+
+
+
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls/');
+  if (!req.body.email || !req.body.password || emailPassMatch(req.body.email) !== req.body.password) {
+    res.status(403).send('Please enter a valid email/password');
+  } else {
+    let userInfo = userLookup(req.body.email);
+    res.cookie('userID', userInfo.id);
+    res.redirect('/urls');
+  }
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('userID');
   res.redirect('/urls/');
 });
 
@@ -96,4 +159,39 @@ app.post('/logout', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
+});
+
+//// #USER REGISTRATION ////
+
+app.get('/register', (req, res) => {
+  res.render('urls_register');
+});
+
+function emailExist(formEmail) {
+  for (let item in usersDB) {
+    if (usersDB[item].email === formEmail) {
+      return true;
+    }
+  }
+  return false;
+}
+
+app.post('/register', (req, res) => {
+  const randUser = getRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  let userID = usersDB.userID;
+  if (!email || !password) {
+    res.status(400).send('Please enter a valid email/password');
+  } else if (emailExist(req.body.email)) {
+    res.status(400).send('That email address is already registered, please try again');
+  } else {
+    usersDB[randUser] = {
+      id: randUser,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie('userID', randUser);
+    res.redirect('/urls/');
+  }
 });
