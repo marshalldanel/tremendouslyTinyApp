@@ -142,7 +142,7 @@ function userLookup(formEmail) {
 
 app.post('/login', (req, res) => {
   if (!req.body.email || !req.body.password || emailPassMatch(req.body.email) !== req.body.password) {
-    res.status(400).send('Please enter a valid email/password');
+    res.status(403).send('Please enter a valid email/password');
   } else {
     let userInfo = userLookup(req.body.email);
     res.cookie('userID', userInfo.id);
@@ -187,7 +187,7 @@ app.post('/register', (req, res) => {
     res.status(400).send('That email address is already registered, please try again');
   } else {
     usersDB[randUser] = {
-      userID: randUser,
+      id: randUser,
       email: req.body.email,
       password: req.body.password
     };
