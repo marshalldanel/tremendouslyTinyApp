@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 const app = express();
@@ -13,14 +13,6 @@ app.set('view engine', 'ejs');
 //////
 
 var urlDatabase = {
-  'b2xVn2': {
-    longURL: 'http://www.lighthouse.cs',
-    user: "hjk9h"
-  },
-  '9sm5xk': {
-    longURL: 'http://www.google.com',
-    user: "kihd9"
-  }
 };
 
 //////
@@ -28,20 +20,10 @@ var urlDatabase = {
 //////
 
 var usersDB = {
-  "hjk9h": {
-    id: "hjk9h",
-    email: "van@hotmail.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "kihd9": {
-    id: "kihd9",
-    email: "van@gmail.com",
-    password: "dishwasher-funk"
-  },
-  "njaksl": {
-    id: "njaksl",
-    email: "mmm@mmm.com",
-    password: "mmm"
+  'ObD653': {
+    id: 'ObD653',
+    email: 'joe@joe.com',
+    password: '$2a$10$EdlUDTJMykbVAQJAkjffL.0eHEUTtyEoILkGewQAMj/0wjrTzTSeC'
   }
 };
 
@@ -49,17 +31,20 @@ var usersDB = {
 //// #MIDDLEWARE ////
 //////
 
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'poop',
+  keys: ["hksdn"],
+  maxAge: 24 * 60 * 60 * 1000
+}));
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(function (req, res, next) {
   res.locals = {
-    user: usersDB[req.cookies["userID"]]
+    user: usersDB[req.session.userId]
   };
   next();
 });
-
-
 
 //////
 //// #HELPER FUNCTIONS ////
@@ -91,7 +76,7 @@ function userLookup(formEmail) {
 }
 
 function emailExist(formEmail) {
-  return !!userLookup(formEmail);
+  return Boolean(userLookup(formEmail));
 }
 
 //////
@@ -124,38 +109,24 @@ function urlsForUser(id) {
 }
 
 app.get('/urls', (req, res) => {
-  if (!req.cookies["userID"]) {
+  console.log(req.session.userId);
+  if (req.session.userId === undefined) {
     res.redirect('/login');
   } else {
-    const newUserUrls = urlsForUser(req.cookies["userID"]);
+    const newUserUrls = urlsForUser(req.session.userId);
     const templateVars = { urls: newUserUrls};
     res.render('urls_index', templateVars);
   }
 });
 
-// app.get('/urls', (req, res) => {
-  
-//     const newUserUrls = urlsForUser(req.cookies["userID"].id);
-//     const templateVars = { urls: newUserUrls };
-//     res.render('urls_index', templateVars);
-//   }
-// });
-
-/////////
 app.post('/urls', (req, res) => {
   let randStr = getRandomString();
-  let user = usersDB[req.cookies["userID"]];
+  let user = usersDB[req.session.userId];
   urlDatabase[randStr] = {
     longURL: req.body.longURL,
-    user: usersDB[req.cookies["userID"]].id
+    user: usersDB[req.session.userId].id
   };
   res.redirect(`/urls/${randStr}`);
-});
-/////
-
-app.post('urls/new', (req, res) => {
-  const shortURL = req.params.id;
-  usersDB.id[req.params.id] = req.body.longURL;
 });
 
 //////
@@ -163,7 +134,7 @@ app.post('urls/new', (req, res) => {
 /////
 
 app.get('/urls/new', (req, res) => {
-  if (!usersDB[req.cookies["userID"]]) {
+  if (!usersDB[req.session.userId]) {
     res.redirect('/login');
   } else {
     res.render('urls_new');
@@ -181,7 +152,7 @@ app.get('/u/:shortURL', (req, res) => {
 //////
 
 app.get('/urls/:id', (req, res) => {
-  if (!usersDB[req.cookies["userID"]]) {
+  if (!usersDB[req.session.userId]) {
     res.redirect('/login');
   } else {
     const shortURL = req.params.id;
@@ -193,14 +164,13 @@ app.get('/urls/:id', (req, res) => {
 
 // Update
 app.post('/urls/:id', (req, res) => {
-  urlDatabase[req.params.id] = {longURL: req.body.longURL, user: usersDB[req.cookies["userID"]].id};
+  urlDatabase[req.params.id] = {longURL: req.body.longURL, user: usersDB[req.session.userId].id};
   res.redirect('/urls/');
 });
 
-// delete
 app.post('/urls/:id/delete', (req, res) => {
   const url = urlDatabase[req.params.id];
-  if (!usersDB[req.cookies["userID"]] || url === undefined) {
+  if (!usersDB[req.session.userId] || url === undefined) {
     res.redirect('/login');
     res.status(404).send(`Cannot delete ${url}`);
   } else {
@@ -213,23 +183,33 @@ app.post('/urls/:id/delete', (req, res) => {
 //// #LOGIN/OUT ////
 //////
 
-app.get('/login', (res, req) => {
-  req.render('urls_login');
+app.get('/login', (req, res) => {
+  res.render('urls_login');
 });
 
 app.post('/login', (req, res) => {
   let userInfo = userLookup(req.body.email);
-  if (userInfo === undefined || !bcrypt.compareSync(req.body.password, userInfo.password)) {
+  console.log('hi');
+  if (userInfo === undefined) {
+    console.log('no');
     res.status(403).send('Please enter a valid email/password');
+    console.log('yes');
   } else {
-    res.cookie('userID', userInfo.id);
-    res.redirect('/urls');
+    if (!bcrypt.compareSync(req.body.password, userInfo.password)) {
+      console.log('boo');
+      res.status(403).send('Please enter a valid email/password');
+    } else {
+      console.log('h');
+      req.session.userId = userInfo.id;
+      console.log(req.session.userId);
+      res.redirect('/urls');
+    }
   }
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('userID');
-  res.redirect('/urls/');
+  req.session = null;
+  res.redirect('/urls');
 });
 
 ///////
@@ -264,8 +244,7 @@ app.post('/register', (req, res) => {
       email: req.body.email,
       password: hashedPassword
     };
-    res.cookie('userID', randUser);
-    console.log(usersDB);
+    req.session.userId = randUser;
     res.redirect('/urls/');
   }
 });
