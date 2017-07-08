@@ -15,7 +15,7 @@ Enjoy your url and your day.
 
 ![Screenshot of URLs page](https://github.com/marshalldanel/tremendouslyTinyApp/blob/master/docs/urls-page.png?raw=true)
 
-### Project Stack
+## Project Stack
 
 Web Server: Node.js
 
@@ -27,7 +27,7 @@ Database: None, just an "In-Memory Object"
 
 Other dependencies: bcrypt, body-parser, cookie-session
 
-### Installing
+## Installing
 
 Start by installing all dependencies
 
