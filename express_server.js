@@ -14,6 +14,7 @@ app.set('view engine', 'ejs');
 
 var urlDatabase = {
 };
+
 //////
 //// #USER DATABASE ////
 //////
@@ -53,18 +54,10 @@ getRandomString = function() {
   return text;
 };
 
-function emailPassMatch(formEmail) {
-  for (let item in usersDB) {
-    if (usersDB[item].email === formEmail) {
-      return usersDB[item].password;
-    }
-  }
-}
-
 function userLookup(formEmail) {
-  for (let item in usersDB) {
-    if (usersDB[item].email === formEmail) {
-      return usersDB[item];
+  for (let user in usersDB) {
+    if (usersDB[user].email === formEmail) {
+      return usersDB[user];
     }
   }
 }
@@ -75,9 +68,9 @@ function emailExist(formEmail) {
 
 function urlsForUser(id) {
   let userURL = {};
-  for (let item in urlDatabase) {
-    if (urlDatabase[item].user === id) {
-      userURL[item] = urlDatabase[item].longURL;
+  for (let urlShortCode in urlDatabase) {
+    if (urlDatabase[urlShortCode].user === id) {
+      userURL[urlShortCode] = urlDatabase[urlShortCode].longURL;
     }
   }
   return userURL;
@@ -100,7 +93,7 @@ app.get('/', (req, res) => {
 //// #EASTER EGG ////
 //////
 
-app.get('/hello', (req, res) => {
+app.get('/heyho', (req, res) => {
   res.end('<a href="http://heeeeeeeey.com/">Hello</a>');
 });
 
@@ -112,15 +105,15 @@ app.get('/urls', (req, res) => {
   if (req.session.userId === undefined) {
     res.redirect('/login');
   } else {
-    const newUserUrls = urlsForUser(req.session.userId);
-    const templateVars = { urls: newUserUrls};
+    const userUrls = urlsForUser(req.session.userId);
+    const templateVars = { urls: userUrls};
     res.render('urls_index', templateVars);
   }
 });
 
 app.post('/urls', (req, res) => {
   if (req.session.userId === undefined) {
-    res.status(404).send('Please login to view your URLs.');
+    res.status(400).send('Please login to view your URLs.');
   } else {
     let randStr = getRandomString();
     let user = usersDB[req.session.userId];
@@ -150,7 +143,7 @@ app.get('/u/:shortURL', (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.Status(404).send('The requested URL does not exist');
+    res.status(400).send('The requested URL does not exist');
   }
 });
 
@@ -178,7 +171,7 @@ app.post('/urls/:id', (req, res) => {
   if (!usersDB[req.session.userId]) {
     res.redirect('/login');
   } else if (usersDB[req.session.userId].id !== urlDatabase[req.params.id].user) {
-    res.status(404).send('You can only update your own urls ~ thank you');
+    res.status(400).send('You can only update your own urls ~ thank you');
   } else {
     urlDatabase[req.params.id] = {longURL: req.body.longURL, user: usersDB[req.session.userId].id};
     res.redirect('/urls');
@@ -188,7 +181,7 @@ app.post('/urls/:id', (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const url = urlDatabase[req.params.id];
   if (url === undefined || !usersDB[req.session.userId] || usersDB[req.session.userId].id !== url.user) {
-    res.status(404).send(`Cannot delete ${url}`);
+    res.status(400).send(`Cannot delete ${url}`);
   } else {
     delete urlDatabase[req.params.id];
     res.redirect('/urls');
