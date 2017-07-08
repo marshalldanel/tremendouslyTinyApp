@@ -14,17 +14,11 @@ app.set('view engine', 'ejs');
 
 var urlDatabase = {
 };
-
 //////
 //// #USER DATABASE ////
 //////
 
 var usersDB = {
-  'ObD653': {
-    id: 'ObD653',
-    email: 'joe@joe.com',
-    password: '$2a$10$EdlUDTJMykbVAQJAkjffL.0eHEUTtyEoILkGewQAMj/0wjrTzTSeC'
-  }
 };
 
 //////
@@ -79,6 +73,29 @@ function emailExist(formEmail) {
   return Boolean(userLookup(formEmail));
 }
 
+function urlsForUser(id) {
+  let userURL = {};
+  for (let item in urlDatabase) {
+    if (urlDatabase[item].user === id) {
+      userURL[item] = urlDatabase[item].longURL;
+    }
+  }
+  return userURL;
+}
+
+//////
+//// #HOME ////
+//////
+
+app.get('/', (req, res) => {
+  if (req.session.userId === undefined) {
+    res.redirect('/login');
+  } else {
+    res.redirect('/urls');
+  }
+});
+
+
 //////
 //// #EASTER EGG ////
 //////
@@ -91,16 +108,6 @@ app.get('/hello', (req, res) => {
 //// #URLS ////
 //////
 
-function urlsForUser(id) {
-  let userURL = {};
-  for (let item in urlDatabase) {
-    if (urlDatabase[item].user === id) {
-      userURL[item] = urlDatabase[item].longURL;
-    }
-  }
-  return userURL;
-}
-
 app.get('/urls', (req, res) => {
   if (req.session.userId === undefined) {
     res.redirect('/login');
@@ -112,13 +119,17 @@ app.get('/urls', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  let randStr = getRandomString();
-  let user = usersDB[req.session.userId];
-  urlDatabase[randStr] = {
-    longURL: req.body.longURL,
-    user: usersDB[req.session.userId].id
-  };
-  res.redirect(`/urls/${randStr}`);
+  if (req.session.userId === undefined) {
+    res.status(404).send('Please login to view your URLs.');
+  } else {
+    let randStr = getRandomString();
+    let user = usersDB[req.session.userId];
+    urlDatabase[randStr] = {
+      longURL: req.body.longURL,
+      user: usersDB[req.session.userId].id
+    };
+    res.redirect(`/urls/${randStr}`);
+  }
 });
 
 //////
@@ -139,7 +150,7 @@ app.get('/u/:shortURL', (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.sendStatus(404);
+    res.Status(404).send('The requested URL does not exist');
   }
 });
 
@@ -149,7 +160,11 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   if (!usersDB[req.session.userId]) {
-    res.redirect('/login');
+    res.status(400).send('Please login');
+  } else if (urlDatabase[req.params.id] === undefined) {
+    res.status(400).send('Requested URL does not exist');
+  } else if (usersDB[req.session.userId].id !== urlDatabase[req.params.id].user) {
+    res.status(400).send('Users can only change their own URLs');
   } else {
     const shortURL = req.params.id;
     const longURL = urlDatabase[req.params.id];
@@ -158,16 +173,21 @@ app.get('/urls/:id', (req, res) => {
   }
 });
 
-// Update
+
 app.post('/urls/:id', (req, res) => {
-  urlDatabase[req.params.id] = {longURL: req.body.longURL, user: usersDB[req.session.userId].id};
-  res.redirect('/urls/');
+  if (!usersDB[req.session.userId]) {
+    res.redirect('/login');
+  } else if (usersDB[req.session.userId].id !== urlDatabase[req.params.id].user) {
+    res.status(404).send('You can only update your own urls ~ thank you');
+  } else {
+    urlDatabase[req.params.id] = {longURL: req.body.longURL, user: usersDB[req.session.userId].id};
+    res.redirect('/urls');
+  }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   const url = urlDatabase[req.params.id];
-  if (!usersDB[req.session.userId] || url === undefined) {
-    res.redirect('/login');
+  if (url === undefined || !usersDB[req.session.userId] || usersDB[req.session.userId].id !== url.user) {
     res.status(404).send(`Cannot delete ${url}`);
   } else {
     delete urlDatabase[req.params.id];
@@ -180,7 +200,11 @@ app.post('/urls/:id/delete', (req, res) => {
 //////
 
 app.get('/login', (req, res) => {
-  res.render('urls_login');
+  if (!usersDB[req.session.userId]) {
+    res.render('urls_login');
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 app.post('/login', (req, res) => {
@@ -215,7 +239,11 @@ app.listen(PORT, () => {
 //////
 
 app.get('/register', (req, res) => {
-  res.render('urls_register');
+  if (!usersDB[req.session.userId]) {
+    res.render('urls_register');
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 app.post('/register', (req, res) => {
