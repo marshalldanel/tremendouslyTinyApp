@@ -80,14 +80,6 @@ function emailExist(formEmail) {
 }
 
 //////
-//// #HOME ////
-//////
-
-app.get('/', (req, res) => {
-  res.redirect('/urls/');
-});
-
-//////
 //// #EASTER EGG ////
 //////
 
@@ -98,6 +90,7 @@ app.get('/hello', (req, res) => {
 //////
 //// #URLS ////
 //////
+
 function urlsForUser(id) {
   let userURL = {};
   for (let item in urlDatabase) {
@@ -109,7 +102,6 @@ function urlsForUser(id) {
 }
 
 app.get('/urls', (req, res) => {
-  console.log(req.session.userId);
   if (req.session.userId === undefined) {
     res.redirect('/login');
   } else {
@@ -144,7 +136,11 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/u/:shortURL', (req, res) => {
   let longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 //////
@@ -189,19 +185,13 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   let userInfo = userLookup(req.body.email);
-  console.log('hi');
   if (userInfo === undefined) {
-    console.log('no');
     res.status(403).send('Please enter a valid email/password');
-    console.log('yes');
   } else {
     if (!bcrypt.compareSync(req.body.password, userInfo.password)) {
-      console.log('boo');
       res.status(403).send('Please enter a valid email/password');
     } else {
-      console.log('h');
       req.session.userId = userInfo.id;
-      console.log(req.session.userId);
       res.redirect('/urls');
     }
   }
