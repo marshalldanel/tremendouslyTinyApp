@@ -11,6 +11,10 @@ This app is a full stack web application built with Node and Express. It allows 
 Find an enormous URL that you would like to shorten. Type it in the box. Hit enter. Poof! Copy and past your tremendously small URL.
 Enjoy your url and your day.
 
+## Screenshots
+
+!["https://github.com/marshalldanel/tremendouslyTinyApp/blob/master/docs/urls-page.png?raw=true"](#)
+
 ### Project Stack
 
 Web Server: Node.js
@@ -31,7 +35,7 @@ Start by installing all dependencies
 npm install
 ```
 
-Run the devvelopment web server
+Run the development web server
 
 ```
 node espress_server.js
