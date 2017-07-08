@@ -13,7 +13,7 @@ Enjoy your url and your day.
 
 ## Screenshots
 
-!["https://github.com/marshalldanel/tremendouslyTinyApp/blob/master/docs/urls-page.png?raw=true"](#)
+![Screenshot of URLs page](https://github.com/marshalldanel/tremendouslyTinyApp/blob/master/docs/urls-page.png?raw=true)
 
 ### Project Stack
 
