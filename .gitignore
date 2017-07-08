@@ -39,3 +39,7 @@ Thumbs.db
 # Directory files #
 ####################
 requirements.md
+
+# Node Modules #
+#################
+node_modules/
