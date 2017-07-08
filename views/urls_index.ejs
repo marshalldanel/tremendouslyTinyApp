@@ -12,14 +12,14 @@
       <th>Long URL</th>
       <th>Tiny URL</th>
     </tr>
-    <% for(let db in urls) { %>
+    <% for(let urlShortCode in urls) { %>
       <tr>
-        <td><%= urls[db] %></td>
-        <td><%= db %></td>
-        <td><a href='/u/<%=db%>'>My tiny link</a></td>
-        <td><a href="/urls/<%=db%>">Edit</a></td>
+        <td><%= urls[urlShortCode] %></td>
+        <td><%= urlShortCode %></td>
+        <td><a href='/u/<%=urlShortCode%>'>My tiny link</a></td>
+        <td><a href="/urls/<%=urlShortCode%>">Edit</a></td>
         <td>
-          <form method='POST' action='/urls/<%= db %>/delete'>
+          <form method='POST' action='/urls/<%= urlShortCode %>/delete'>
             <input type='submit' value='Delete'>
           </form>
         </td>
