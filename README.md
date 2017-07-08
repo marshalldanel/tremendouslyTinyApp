@@ -4,7 +4,7 @@
 
 # Tremendously Tiny URL Shortener
 
-This app takes in a great big full length URL and makes it both tiny and great again.
+This app is a full stack web application built with Node and Express. It allows users to input a full length URL and makes it both tiny and great again.
 
 ## Getting Started
 
@@ -21,24 +21,20 @@ Template Engine: EJS
 
 Database: None, just an "In-Memory Object"
 
+Other dependencies: bcrypt, body-parser, cookie-session
+
 ### Installing
 
-Start with node
+Start by installing all dependencies
 
 ```
-npm init
+npm install
 ```
 
-Install Express
+Run the devvelopment web server
 
 ```
- npm install express --save
-```
-
-Install EJS
-
-```
- npm install ejs --save
+node espress_server.js
 ```
 
 Boom. Fantastic.
