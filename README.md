@@ -1,7 +1,3 @@
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
-
 # Tremendously Tiny URL Shortener
 
 This app is a full stack web application built with Node and Express. It allows users to input a full length URL and makes it both tiny and great again.
@@ -71,10 +67,3 @@ Just over the horizon...
 * Cheers to the coffee Gods for their sweet sweet nectar
 * Inspiration
 * Small hands everywhere
-
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/hexpm/dt/plug.svg
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
